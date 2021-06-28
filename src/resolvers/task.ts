@@ -38,4 +38,14 @@ export class TaskResolver {
         await em.persistAndFlush(task);
         return task;
     }
+
+    @Mutation(() => Boolean)
+    async deletePost(
+        @Arg('id') id: number,
+        @Ctx() { em }: Context
+    ): Promise<boolean>{
+        await em.nativeDelete(Task, { id })
+        return true;
+    }
+    }
 }
