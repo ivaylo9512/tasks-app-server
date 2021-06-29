@@ -1,5 +1,5 @@
-import { Resolver, Query, Ctx, Arg, Int, Mutation } from 'type-graphql';
-import { Context } from 'src/types';
+import { Resolver, Query, Ctx, Arg, Mutation } from 'type-graphql';
+import { ApolloContext } from 'src/types';
 import { Task } from '../entities/task';
 
 @Resolver()
@@ -7,7 +7,7 @@ export class TaskResolver {
     @Query(() => Task, { nullable: true })
     getTask(
         @Arg('id') id: number,
-        @Ctx() { em }: Context
+        @Ctx() { em }: ApolloContext
     ): Promise<Task | null>{
         return em.findOne(Task, { id })
     }
@@ -15,7 +15,7 @@ export class TaskResolver {
     @Mutation(() => Task)
     async createTask(
         @Arg('name') name: string,
-        @Ctx() { em }: Context
+        @Ctx() { em }: ApolloContext
     ): Promise<Task>{
         const task = em.create(Task, { name });
         await em.persistAndFlush(task);
@@ -26,12 +26,9 @@ export class TaskResolver {
     async updateTask(
         @Arg('id') id: number,
         @Arg('name', () => String, { nullable: true }) name: string,
-        @Ctx() { em }: Context
+        @Ctx() { em }: ApolloContext
     ): Promise<Task>{
-        const task = await em.findOne(Task. { id })
-        if(!task){
-            throw new Error('No title with id:' + id);
-        }
+        const task = await em.findOneOrFail(Task, { id })
         if(typeof name !== 'undefined'){
             task.name = name;
         }
@@ -42,10 +39,9 @@ export class TaskResolver {
     @Mutation(() => Boolean)
     async deletePost(
         @Arg('id') id: number,
-        @Ctx() { em }: Context
+        @Ctx() { em }: ApolloContext
     ): Promise<boolean>{
         await em.nativeDelete(Task, { id })
         return true;
-    }
     }
 }

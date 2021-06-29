@@ -1,14 +1,15 @@
 import 'reflect-metadata';
 import { MikroORM } from '@mikro-orm/core';
 import mikroConfig from './mikro-orm.config';
-import { Task } from './entities/Task';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import { TaskResolver } from './resolvers/task';
+import { ApolloContext } from './types';
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
+    await orm.getMigrator().up();
 
     const app = express();
 
@@ -17,13 +18,14 @@ const main = async () => {
             resolvers: [TaskResolver],
             validate: false
         }),
-        context: () => ({ em: orm.em })
+        context: ({req, res}): ApolloContext => ({ em: orm.em, req, res })
     });
 
     apolloServer.applyMiddleware({ app })
 
-    app.listen(8099, () =>{
-        console.log('server started on localhost')
+    const port = process.env.PORT || 8099;
+    app.listen(port, () =>{
+        console.log(`\n🚀!! server started on http://localhost:${port} !!`)
     })
 }
 
