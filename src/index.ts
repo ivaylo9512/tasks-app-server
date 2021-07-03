@@ -6,13 +6,18 @@ import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import { TaskResolver } from './resolvers/task';
 import { ApolloContext } from './types';
+import cors from 'cors';
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
     await orm.getMigrator().up();
 
     const app = express();
-
+    app.use(cors({
+        origin: 'http://localhost:3000',
+        credentials: true
+    }))
+    
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
             resolvers: [TaskResolver],
