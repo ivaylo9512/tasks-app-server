@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, IdentifiedReference, ManyToOne } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, IdentifiedReference, ManyToOne, TimeType } from '@mikro-orm/core';
 import { User } from './User';
 import { ObjectType, Field, Int } from 'type-graphql';
 
@@ -25,6 +25,15 @@ export class Task {
   @Property({ type: 'date' })
   alertAt = new Date();
 
-  @ManyToOne()
-  owner!: IdentifiedReference<User>;
+  @Field(() => Date)
+  @Property({ type: TimeType})
+  from: TimeType;
+
+  @Field(() => Date)
+  @Property({ type: TimeType})
+  to: TimeType;
+
+  @Field(() => Boolean)
+  @Property({ type: 'boolean' })
+  isDaily: boolean;
 }
