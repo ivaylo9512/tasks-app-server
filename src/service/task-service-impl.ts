@@ -1,7 +1,7 @@
 import { TaskInput } from "src/types";
 import { Task } from "src/entities/task";
 import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
-import TaskService from "./base/taskService";
+import TaskService from "./base/task-service";
 
 export default class TaskServiceImpl implements TaskService{
     em : EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>
@@ -10,17 +10,17 @@ export default class TaskServiceImpl implements TaskService{
         this.em = em;
     }  
 
-    async findTask(id: number): Promise<Task | null> {
+    async findById(id: number): Promise<Task | null> {
         return await this.em.findOne(Task, { id });
     }
     
-    async createTask(taskInput: TaskInput): Promise<Task> {
+    async create(taskInput: TaskInput): Promise<Task> {
         const task = this.em.create(Task, taskInput);
         await this.em.persistAndFlush(task);
         return task;
     }
 
-    async updateTask(taskInput: TaskInput): Promise<Task> {
+    async update(taskInput: TaskInput): Promise<Task> {
         const task = await this.em.findOneOrFail(Task, { id: taskInput.id });
 
         TaskServiceImpl.checkValues(taskInput, task);
