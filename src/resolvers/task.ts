@@ -1,40 +1,38 @@
 import { Resolver, Query, Ctx, Arg, Mutation } from 'type-graphql';
-import { ApolloContext, TaskInput } from 'src/types';
+import { ApolloContext, TaskInput } from '../types';
 import { Task } from '../entities/task';
-import TaskService from 'src/service/task-service-impl';
-
 
 @Resolver()
 export class TaskResolver {
     @Query(() => Task, { nullable: true })
     getTask(
         @Arg('id') id: number,
-        @Ctx() { em }: ApolloContext
+        @Ctx() { services: { taskService } }: ApolloContext
     ): Promise<Task | null>{
-        return TaskResolver.findTask(id);
+        return taskService.findById(id);
     }
 
     @Mutation(() => Task)
     async createTask(
         @Arg('taskInput') taskInput: TaskInput,
-        @Ctx() { em }: ApolloContext
+        @Ctx() { services: { taskService } }: ApolloContext
     ): Promise<Task>{
-        return TaskService.createTask(taskInput);
+        return taskService.create(taskInput);
     }
 
     @Mutation(() => Task)
     async updateTask(
         @Arg('taskInput') taskInput: TaskInput,
-        @Ctx() { em }: ApolloContext
+        @Ctx() {services: { taskService }}: ApolloContext
     ): Promise<Task>{
-        return TaskService.updateTask(taskInput);
+        return taskService.update(taskInput);
     }
 
     @Mutation(() => Boolean)
     async deleteTask(
         @Arg('id') id: number,
-        @Ctx() { em }: ApolloContext
+        @Ctx() { services: { taskService } }: ApolloContext
     ): Promise<boolean>{
-        return TaskService.delete(id)
+        return taskService.delete(id)
     }
 }

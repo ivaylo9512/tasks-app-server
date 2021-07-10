@@ -1,5 +1,5 @@
-import { TaskInput } from "src/types";
-import { Task } from "src/entities/task";
+import { TaskInput } from "../types";
+import { Task } from "../entities/task";
 import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import TaskService from "./base/task-service";
 
@@ -11,7 +11,7 @@ export default class TaskServiceImpl implements TaskService{
     }  
 
     async findById(id: number): Promise<Task | null> {
-        return await this.em.findOne(Task, { id });
+        return await this.em.findOneOrFail(Task, { id });
     }
     
     async create(taskInput: TaskInput): Promise<Task> {
@@ -30,7 +30,9 @@ export default class TaskServiceImpl implements TaskService{
     }
 
     async delete(id: number): Promise<boolean> {
-        await this.em.nativeDelete(Task, { id })
+        const task = await this.em.findOneOrFail(Task, { id });
+        await this.em.removeAndFlush(task);
+        
         return true;
     }
 
