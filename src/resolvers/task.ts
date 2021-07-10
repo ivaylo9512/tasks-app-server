@@ -1,7 +1,14 @@
 import { Resolver, Query, Ctx, Arg, Mutation } from 'type-graphql';
 import { ApolloContext } from 'src/types';
-import { Task } from '../entities/task';
+import { Task } from '../entities/Task';
 
+type TaskInput = {
+    id?: number,
+    from: Date,
+    to: Date,
+    daily: boolean,
+    alertAt: Date
+}
 @Resolver()
 export class TaskResolver {
     @Query(() => Task, { nullable: true })
@@ -14,34 +21,41 @@ export class TaskResolver {
 
     @Mutation(() => Task)
     async createTask(
-        @Arg('name') name: string,
+        @Arg('taskInput') taskInput: TaskInput,
         @Ctx() { em }: ApolloContext
     ): Promise<Task>{
-        const task = em.create(Task, { name });
+        const task = em.create(Task, taskInput);
         await em.persistAndFlush(task);
         return task
     }
 
     @Mutation(() => Task)
     async updateTask(
-        @Arg('id') id: number,
-        @Arg('name', () => String, { nullable: true }) name: string,
+        @Arg('taskInput') taskInput: TaskInput,
         @Ctx() { em }: ApolloContext
     ): Promise<Task>{
-        const task = await em.findOneOrFail(Task, { id })
-        if(typeof name !== 'undefined'){
-            task.name = name;
-        }
+        const task = await em.findOneOrFail(Task, { id: taskInput.id });
+
+        checkValues(taskInput, task);
+
         await em.persistAndFlush(task);
         return task;
     }
 
     @Mutation(() => Boolean)
-    async deletePost(
+    async deleteTask(
         @Arg('id') id: number,
         @Ctx() { em }: ApolloContext
     ): Promise<boolean>{
         await em.nativeDelete(Task, { id })
         return true;
     }
+}
+
+const checkValues = (taskInput: TaskInput, task : {[key: string]:any}) => {
+    Object.entries(taskInput).forEach(([key, value]) => {
+        if(typeof value !== 'undefined'){
+            task[key] = value;
+        }
+    });
 }
