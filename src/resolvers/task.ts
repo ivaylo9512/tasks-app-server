@@ -1,15 +1,9 @@
 import { Resolver, Query, Ctx, Arg, Mutation } from 'type-graphql';
 import { ApolloContext, TaskInput } from 'src/types';
 import { Task } from '../entities/task';
-import TaskService from 'src/service/taskServiceImpl';
+import TaskService from 'src/service/task-service-impl';
 
-type TaskInput = {
-    id?: number,
-    from: Date,
-    to: Date,
-    daily: boolean,
-    alertAt: Date
-}
+
 @Resolver()
 export class TaskResolver {
     @Query(() => Task, { nullable: true })
