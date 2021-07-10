@@ -1,5 +1,5 @@
 import { Entity, PrimaryKey, Property, IdentifiedReference, ManyToOne, TimeType } from '@mikro-orm/core';
-import { User } from './User';
+import { User } from './user';
 import { ObjectType, Field, Int } from 'type-graphql';
 
 @ObjectType()
@@ -22,8 +22,8 @@ export class Task {
   name!: string;
 
   @Field(() => String)
-  @Property({ type: 'date' })
-  alertAt = new Date();
+  @Property({ type: 'date', nullable: true })
+  alertAt?: Date;
 
   @Field(() => Date)
   @Property({ type: TimeType})
