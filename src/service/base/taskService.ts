@@ -1,11 +1,9 @@
-import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import { TaskInput } from "src/types";
 import { Task } from "src/entities/task";
 
 export default interface TaskService {
-    new (em: EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>): TaskService;
-    findTask(id:number): Promise<Task>;
+    findTask(id:number): Promise<Task | null>;
     createTask(taskInput: TaskInput): Promise<Task>;
     updateTask(taskInput: TaskInput): Promise<Task>;
-    delete(id: number): boolean;
+    delete(id: number): Promise<boolean>;
 }

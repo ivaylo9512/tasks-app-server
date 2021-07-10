@@ -1,6 +1,7 @@
 import { Resolver, Query, Ctx, Arg, Mutation } from 'type-graphql';
-import { ApolloContext } from 'src/types';
-import { Task } from '../entities/Task';
+import { ApolloContext, TaskInput } from 'src/types';
+import { Task } from '../entities/task';
+import TaskService from 'src/service/taskServiceImpl';
 
 type TaskInput = {
     id?: number,
@@ -16,7 +17,7 @@ export class TaskResolver {
         @Arg('id') id: number,
         @Ctx() { em }: ApolloContext
     ): Promise<Task | null>{
-        return em.findOne(Task, { id })
+        return TaskResolver.findTask(id);
     }
 
     @Mutation(() => Task)
@@ -24,9 +25,7 @@ export class TaskResolver {
         @Arg('taskInput') taskInput: TaskInput,
         @Ctx() { em }: ApolloContext
     ): Promise<Task>{
-        const task = em.create(Task, taskInput);
-        await em.persistAndFlush(task);
-        return task
+        return TaskService.createTask(taskInput);
     }
 
     @Mutation(() => Task)
@@ -34,12 +33,7 @@ export class TaskResolver {
         @Arg('taskInput') taskInput: TaskInput,
         @Ctx() { em }: ApolloContext
     ): Promise<Task>{
-        const task = await em.findOneOrFail(Task, { id: taskInput.id });
-
-        checkValues(taskInput, task);
-
-        await em.persistAndFlush(task);
-        return task;
+        return TaskService.updateTask(taskInput);
     }
 
     @Mutation(() => Boolean)
@@ -47,15 +41,6 @@ export class TaskResolver {
         @Arg('id') id: number,
         @Ctx() { em }: ApolloContext
     ): Promise<boolean>{
-        await em.nativeDelete(Task, { id })
-        return true;
+        return TaskService.delete(id)
     }
-}
-
-const checkValues = (taskInput: TaskInput, task : {[key: string]:any}) => {
-    Object.entries(taskInput).forEach(([key, value]) => {
-        if(typeof value !== 'undefined'){
-            task[key] = value;
-        }
-    });
 }
