@@ -1,5 +1,5 @@
-import { TaskInput } from "src/types";
-import { Task } from "src/entities/task";
+import { TaskInput } from '../../resolvers/types/task-input';
+import { Task } from 'src/entities/task';
 import Service from "./service";
 
 export default interface TaskService extends Service<Task>{
