@@ -1,6 +1,6 @@
-import { TaskInput } from "../types";
+import { TaskInput } from "../resolvers/types/task-input";
 import { Task } from "../entities/task";
-import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
+import { EntityManager, IDatabaseDriver, Connection, wrap } from "@mikro-orm/core";
 import TaskService from "./base/task-service";
 
 export default class TaskServiceImpl implements TaskService{
@@ -25,7 +25,7 @@ export default class TaskServiceImpl implements TaskService{
 
         TaskServiceImpl.checkValues(taskInput, task);
 
-        await this.em.persistAndFlush(task);
+        await this.em.flush();
         return task;
     }
 
