@@ -1,7 +1,8 @@
-import { Task } from './entities/Task';
-import { MikroORM } from '@mikro-orm/core'
+import 'reflect-metadata';
+import { Task } from './entities/task';
+import { MikroORM, ReflectMetadataProvider } from '@mikro-orm/core'
 import path from 'path';
-import { User } from './entities/User';
+import { User } from './entities/user';
 
 export default {
     migrations: {
@@ -10,6 +11,7 @@ export default {
     },
     dbName: 'tasks-app2',
     entities: [Task, User],
+    metadataProvider: ReflectMetadataProvider,
     user: 'postgres',
     password: '1234',
     debug: process.env.NODE_ENV !== 'production',
