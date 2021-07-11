@@ -1,12 +1,15 @@
-import { Entity, PrimaryKey, OneToMany, Collection } from "@mikro-orm/core";
-import { Task } from "./Task";
+import { Entity, PrimaryKey, OneToMany, Collection, Property } from "@mikro-orm/core";
+import { Task } from "./task";
+import { ObjectType, Field, Int } from "type-graphql";
 
 @Entity()
+@ObjectType()
 export class User{
+    @Field(() => Int)
     @PrimaryKey()
-    id!: Number
+    id!: Number;
 
-    @OneToMany(() => Task, task => task.owner)
-    tasks = new Collection<Task>(this);
-    
+    @Field(() => [Task], { nullable: true })
+    @OneToMany(() => Task, t => t.owner)
+    tasks? = new Collection<Task>(this);
 }

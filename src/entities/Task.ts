@@ -36,4 +36,8 @@ export class Task {
   @Field(() => Boolean)
   @Property({ type: 'boolean' })
   isDaily: boolean;
+
+  @ManyToOne({ entity: () => User })
+  @Field(() => User)
+  owner!: User;
 }
