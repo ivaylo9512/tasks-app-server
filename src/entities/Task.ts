@@ -9,11 +9,11 @@ export class Task {
   @PrimaryKey()
   id!: number;
 
-  @Field(() => String)
+  @Field(() => Date)
   @Property({ type: 'date' })
   createdAt = new Date();
 
-  @Field(() => String)
+  @Field(() => Date)
   @Property({ type: 'date', onUpdate: () => new Date() })
   updatedAt = new Date();
 
@@ -21,9 +21,13 @@ export class Task {
   @Property({ type: 'text' })
   name!: string;
 
-  @Field(() => String)
+  @Field(() => Date)
   @Property({ type: 'date', nullable: true })
   alertAt?: Date;
+
+  @Field(() => Date)
+  @Property({ type: 'date', nullable: true })
+  eventDate?: Date;
 
   @Field(() => Date)
   @Property({ type: TimeType})
@@ -33,9 +37,9 @@ export class Task {
   @Property({ type: TimeType})
   to: TimeType;
 
-  @Field(() => Boolean)
-  @Property({ type: 'boolean' })
-  isDaily: boolean;
+  @Field(() => String)
+  @Property({ type: 'text' })
+  state: string;
 
   @ManyToOne({ entity: () => User })
   @Field(() => User)

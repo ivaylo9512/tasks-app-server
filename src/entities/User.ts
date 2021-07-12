@@ -12,4 +12,12 @@ export class User{
     @Field(() => [Task], { nullable: true })
     @OneToMany(() => Task, t => t.owner)
     tasks? = new Collection<Task>(this);
+
+    @Field(() => Date)
+    @Property({ type: 'date' })
+    createdAt = new Date();
+  
+    @Field(() => Date)
+    @Property({ type: 'date', onUpdate: () => new Date() })
+    updatedAt = new Date();
 }
