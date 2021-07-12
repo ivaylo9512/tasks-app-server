@@ -4,5 +4,6 @@ import Service from "./service";
 
 export default interface TaskService extends Service<Task>{
     create(taskInput: TaskInput): Promise<Task>;
+    findByDate(date: Date): Promise<Task[]>;
     update(taskInput: TaskInput): Promise<Task>;
 }

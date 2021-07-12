@@ -6,11 +6,19 @@ import { TaskInput } from './types/task-input';
 @Resolver()
 export class TaskResolver {
     @Query(() => Task, { nullable: true })
-    getTask(
+    async getTask(
         @Arg('id') id: number,
         @Ctx() { services: { taskService } }: ApolloContext
-    ): Promise<Task | null>{
-        return taskService.findById(id);
+    ): Promise<Task | null> {
+        return await taskService.findById(id);
+    }
+
+    @Query(() => [Task])
+    async getTasksByDate(
+        @Arg('date') date: Date,
+        @Ctx() { services: { taskService} } : ApolloContext
+    ): Promise<Task[]> {
+        return await taskService.findByDate(date);
     }
 
     @Mutation(() => Task)
@@ -18,7 +26,7 @@ export class TaskResolver {
         @Arg('taskInput') taskInput: TaskInput,
         @Ctx() { services: { taskService } }: ApolloContext
     ): Promise<Task>{
-        return taskService.create(taskInput);
+        return await taskService.create(taskInput);
     }
 
     @Mutation(() => Task)
@@ -26,7 +34,7 @@ export class TaskResolver {
         @Arg('taskInput') taskInput: TaskInput,
         @Ctx() {services: { taskService }}: ApolloContext
     ): Promise<Task>{
-        return taskService.update(taskInput);
+        return await taskService.update(taskInput);
     }
 
     @Mutation(() => Boolean)
@@ -34,6 +42,6 @@ export class TaskResolver {
         @Arg('id') id: number,
         @Ctx() { services: { taskService } }: ApolloContext
     ): Promise<boolean>{
-        return taskService.delete(id)
+        return await taskService.delete(id)
     }
 }

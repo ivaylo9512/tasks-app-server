@@ -9,7 +9,8 @@ import { ApolloContext, TaskRequest, UserRequest } from './types';
 import cors from 'cors';
 import TaskService from './service/task-service-impl';
 import UserService from './service/user-service-impl';
-import TaskRouter from './routers/task-routes';
+import taskRouter from './routers/task-routes';
+import userRouter from './routers/user-routes';
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
@@ -34,12 +35,12 @@ const main = async () => {
     app.use('/tasks', (req: TaskRequest, res, next) => {
         req.service = taskService;
         next();
-    }, TaskRouter);
+    }, taskRouter);
     
     app.use('/users', (req: UserRequest, res, next) => {
         req.service = userService;
         next();
-    },);
+    },userRouter);
 
     app.use((err, req, res, next) => {
         if(err.message.includes('not found')){
@@ -47,7 +48,7 @@ const main = async () => {
         }else{
             err.status(500).send(err.message)
         }
-      })
+    })
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({

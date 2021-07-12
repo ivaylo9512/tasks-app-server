@@ -6,7 +6,9 @@ const router = Router();
 router.get('/findById/:id', async (req: TaskRequest, res) => {
     return res.send(await req.service?.findById(Number(req.params.id)));
 })
-
+router.get('/findByDate', async (req: TaskRequest, res) => {
+    return res.send(await req.service?.findByDate(req.body));
+})
 router.post('/create', async (req: TaskRequest, res) => {
     return res.send(await req.service?.create(req.body))
 })

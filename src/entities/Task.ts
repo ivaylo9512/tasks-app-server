@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, IdentifiedReference, ManyToOne, TimeType } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, TimeType } from '@mikro-orm/core';
 import { User } from './user';
 import { ObjectType, Field, Int } from 'type-graphql';
 

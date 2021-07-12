@@ -14,6 +14,10 @@ export default class TaskServiceImpl implements TaskService{
         return await this.em.findOneOrFail(Task, { id });
     }
     
+    async findByDate(date: Date): Promise<Task[]> {
+        return await this.em.find(Task, { eventDate: date });
+    }
+
     async create(taskInput: TaskInput): Promise<Task> {
         const task = this.em.create(Task, taskInput);
         await this.em.persistAndFlush(task);
