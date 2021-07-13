@@ -16,9 +16,17 @@ export class TaskResolver {
     @Query(() => [Task])
     async getTasksByDate(
         @Arg('date') date: Date,
-        @Ctx() { services: { taskService} } : ApolloContext
+        @Ctx() { services: { taskService }}: ApolloContext
     ): Promise<Task[]> {
         return await taskService.findByDate(date);
+    }
+
+    @Query(() => [Task])
+    async getTasksByState(
+        @Arg('state') state: string,
+        @Ctx() {services: { taskService }}: ApolloContext
+    ): Promise<Task[]>{
+        return await taskService.findByState(state);
     }
 
     @Mutation(() => Task)
