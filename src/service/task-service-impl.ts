@@ -2,6 +2,8 @@ import { TaskInput } from "../resolvers/types/task-input";
 import { Task } from "../entities/task";
 import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import TaskService from "./base/task-service";
+import { LoggedUser } from "src/types";
+import UnauthorizedException from "src/errors/unauthorized";
 
 export default class TaskServiceImpl implements TaskService{
     em : EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>
@@ -24,12 +26,16 @@ export default class TaskServiceImpl implements TaskService{
 
     async create(taskInput: TaskInput): Promise<Task> {
         const task = this.em.create(Task, taskInput);
-        await this.em.persistAndFlush(task);
+        await this.em.persist(task);
         return task;
     }
 
-    async update(taskInput: TaskInput): Promise<Task> {
-        const task = await this.em.findOneOrFail(Task, { id: taskInput.id });
+    async update(taskInput: TaskInput, loggedUser: LoggedUser): Promise<Task> {
+        const task = await this.em.findOneOrFail(Task, { id: taskInput.id }, ['owner']);
+        
+        if(task.owner.id != loggedUser.id && loggedUser.role != 'admin'){
+            throw new UnauthorizedException('Unauthorized');
+        }
 
         TaskServiceImpl.checkValues(taskInput, task);
 
@@ -37,9 +43,14 @@ export default class TaskServiceImpl implements TaskService{
         return task;
     }
 
-    async delete(id: number): Promise<boolean> {
-        const task = await this.em.findOneOrFail(Task, { id });
-        await this.em.removeAndFlush(task);
+    async delete(id: number, loggedUser: LoggedUser): Promise<boolean> {
+        const task = await this.em.findOneOrFail(Task, { id }, ['owner']);
+        
+        if(task.owner.id != loggedUser.id && loggedUser.role != 'admin'){
+            throw new UnauthorizedException('Unauthorized');
+        }
+        
+        await this.em.remove(task);
         
         return true;
     }

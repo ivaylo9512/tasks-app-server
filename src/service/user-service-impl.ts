@@ -1,7 +1,9 @@
-import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
-import UserService from "./base/user-service";
-import { User } from "../entities/user";
-import { UserInput } from "src/resolvers/types/user-input";
+import { EntityManager, IDatabaseDriver, Connection } from '@mikro-orm/core';
+import UserService from './base/user-service';
+import { User } from '../entities/user';
+import { UserInput } from 'src/resolvers/types/user-input';
+import { LoggedUser } from 'src/types';
+import UnauthorizedException from '../errors/unauthorized'
 
 export default class UserServiceImpl implements UserService{
     em: EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>;
@@ -16,18 +18,27 @@ export default class UserServiceImpl implements UserService{
 
     async create(userInput: UserInput): Promise<User>{
         const user = this.em.create(User, userInput);
-        await this.em.persistAndFlush(user)
+        await this.em.persist(user)
         
         return user;
     }
-    async update(userInput: UserInput): Promise<User>{
+    async update(userInput: UserInput, loggedUser: LoggedUser): Promise<User>{
+        if(userInput.id != loggedUser.id && loggedUser.role != 'admin'){
+            throw new UnauthorizedException('Unauthorized');
+        }
+
         const user = this.em.create(User, userInput);
-        await this.em.persistAndFlush(user)
+        await this.em.persist(user)
         
         return user;
     }
-    async delete(id: number): Promise<boolean>{
-        await this.em.nativeDelete(User, { id });
+    async delete(id: number, loggedUser: LoggedUser): Promise<boolean>{
+        if(id != loggedUser.id && loggedUser.role != 'admin'){
+            throw new UnauthorizedException('Unauthorized');
+        }
+
+        await this.em.nativeDelete(User, {id});
+
         return true;
     }
 }
