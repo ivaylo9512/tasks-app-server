@@ -1,3 +1,4 @@
+import './utils/load-env'
 import 'reflect-metadata';
 import { MikroORM, RequestContext } from '@mikro-orm/core';
 import mikroConfig from './mikro-orm.config';
@@ -11,6 +12,7 @@ import TaskService from './service/task-service-impl';
 import UserService from './service/user-service-impl';
 import taskRouter from './routers/task-routes';
 import userRouter from './routers/user-routes';
+import './utils/authenticate'
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
@@ -41,14 +43,6 @@ const main = async () => {
         req.service = userService;
         next();
     },userRouter);
-
-    app.use((err, req, res, next) => {
-        if(err.message.includes('not found')){
-            res.status(404).send('Entity not found!');
-        }else{
-            err.status(500).send(err.message)
-        }
-    })
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
