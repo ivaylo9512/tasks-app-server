@@ -3,7 +3,7 @@ import { Task } from "../entities/task";
 import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import TaskService from "./base/task-service";
 import { LoggedUser } from "src/types";
-import UnauthorizedException from "src/errors/unauthorized";
+import UnauthorizedException from "../exceptions/unauthorized";
 
 export default class TaskServiceImpl implements TaskService{
     em : EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>
@@ -26,7 +26,8 @@ export default class TaskServiceImpl implements TaskService{
 
     async create(taskInput: TaskInput): Promise<Task> {
         const task = this.em.create(Task, taskInput);
-        await this.em.persist(task);
+        await this.em.persist(task).flush();
+        
         return task;
     }
 
@@ -37,7 +38,7 @@ export default class TaskServiceImpl implements TaskService{
             throw new UnauthorizedException('Unauthorized');
         }
 
-        TaskServiceImpl.checkValues(taskInput, task);
+        TaskServiceImpl.updateFields(taskInput, task);
 
         await this.em.flush();
         return task;
@@ -55,7 +56,7 @@ export default class TaskServiceImpl implements TaskService{
         return true;
     }
 
-    static checkValues(taskInput: TaskInput, task : {[key: string]:any}){
+    static updateFields(taskInput: TaskInput, task : {[key: string]:any}){
         Object.entries(taskInput).forEach(([key, value]) => {
             if(typeof value !== 'undefined'){
                 task[key] = value;

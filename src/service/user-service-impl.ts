@@ -3,7 +3,8 @@ import UserService from './base/user-service';
 import { User } from '../entities/user';
 import { UserInput } from 'src/resolvers/types/user-input';
 import { LoggedUser } from 'src/types';
-import UnauthorizedException from '../errors/unauthorized'
+import UnauthorizedException from '../exceptions/unauthorized'
+import EntitiyNotFoundException from '../exceptions/enitity-not-found';
 
 export default class UserServiceImpl implements UserService{
     em: EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>;
@@ -18,7 +19,7 @@ export default class UserServiceImpl implements UserService{
 
     async create(userInput: UserInput): Promise<User>{
         const user = this.em.create(User, userInput);
-        await this.em.persist(user)
+        await this.em.persist(user).flush();
         
         return user;
     }
@@ -26,9 +27,12 @@ export default class UserServiceImpl implements UserService{
         if(userInput.id != loggedUser.id && loggedUser.role != 'admin'){
             throw new UnauthorizedException('Unauthorized');
         }
+        
+        const user = this.em.findOneOrFail(User, {id: userInput.id});
+        
+        UserServiceImpl.updateFields(user, userInput);
 
-        const user = this.em.create(User, userInput);
-        await this.em.persist(user)
+        await this.em.flush();
         
         return user;
     }
@@ -37,8 +41,18 @@ export default class UserServiceImpl implements UserService{
             throw new UnauthorizedException('Unauthorized');
         }
 
-        await this.em.nativeDelete(User, {id});
+        const count = await this.em.nativeDelete(User, {id});
+
+        if(!count){
+            throw new EntitiyNotFoundException(`User with id: ${id} is not found`);
+        }
 
         return true;
+    }
+
+    static updateFields = (user: {[name: string]: any}, userInput: UserInput) => {
+        Object.entries(userInput).forEach(([key, value]) => {
+            user[key] = value;
+        });
     }
 }
