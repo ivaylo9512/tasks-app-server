@@ -6,9 +6,7 @@ import { User } from './entities/user';
 import EntitiyNotFoundException from './exceptions/enitity-not-found';
 
 export default {
-    findOneOrFailHandler: (entityName: string, where: Dictionary | IPrimaryKey) => {
-        return new EntitiyNotFoundException(`${entityName} not found!`);
-    },
+    findOneOrFailHandler: (entityName: string, where: Dictionary | IPrimaryKey) => new EntitiyNotFoundException(`${entityName} not found!`),
     migrations: {
         path: path.join(__dirname, './migrations'), 
         pattern: /^[\w-]+\d+\.[tj]s$/,

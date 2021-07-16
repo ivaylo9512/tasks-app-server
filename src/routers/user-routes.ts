@@ -9,23 +9,28 @@ router.get('/findById/:id', async (req: UserRequest, res) => {
     res.send(await req.service?.findById(Number(req.params.id)))
 })
 router.post('/create', verifyUser, async (req: UserRequest, res) => {
-    if(!req.user){
+    const loggedUser = req.user;
+    if(!loggedUser){
         throw new UnauthorizedException('Unauthorized');
     }
     
-    req.body.id = req.user.id;
+    req.body.id = loggedUser.id;
     res.send(await req.service?.create(req.body));
 })
 router.delete('/delete/:id', verifyUser, async (req: UserRequest, res) => {
-    if(!req.user){
+    const loggedUser = req.user;
+    if(!loggedUser){
         throw new UnauthorizedException('Unauthorized');
     }
-    res.send(await req.service?.delete(Number(req.params.id), req.user));
+    
+    res.send(await req.service?.delete(Number(req.params.id), loggedUser));
 })
 router.patch('/update', verifyUser, async (req: UserRequest, res) => {
-    if(!req.user){
+    const loggedUser = req.user;
+    if(!loggedUser){
         throw new UnauthorizedException('Unauthorized');
     }
-    res.send(await req.service?.update(req.body, req.user));
+    
+    res.send(await req.service?.update(req.body, loggedUser));
 })
 export default router

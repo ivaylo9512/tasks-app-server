@@ -25,7 +25,6 @@ export interface UserRequest extends Request {
 declare global {
     namespace Express {
       interface User extends LoggedUser{
-          
       }
     }
-  }
+}

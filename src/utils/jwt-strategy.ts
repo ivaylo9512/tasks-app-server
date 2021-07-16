@@ -1,7 +1,11 @@
 import { ExtractJwt, Strategy} from 'passport-jwt'
 import { use, authenticate } from 'passport'
 
-export const jwtSecret = process.env.JWT_SECRET || 'undefined'
+export const jwtSecret = process.env.JWT_SECRET!
+
+if(typeof jwtSecret === 'undefined'){
+    throw new Error('Jwt secret is missing.')
+}
 
 const opts = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

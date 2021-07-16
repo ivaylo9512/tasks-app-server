@@ -9,7 +9,7 @@ export class TaskInput {
     @Field()
     to: Date
     @Field()
-    daily: boolean
+    daily: string
     @Field()
     alertAt: Date
 }

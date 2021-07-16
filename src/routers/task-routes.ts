@@ -1,35 +1,59 @@
 import { Router } from 'express';
 import { TaskRequest } from 'src/types';
 import { verifyUser } from '../utils/jwt-strategy';
-import UnauthorizedException from 'src/exceptions/unauthorized';
+import UnauthorizedException from '../exceptions/unauthorized';
 
 const router = Router();
 
-router.get('/findById/:id', async (req: TaskRequest, res) => {
-    return res.send(await req.service?.findById(Number(req.params.id)));
+router.get('/findById/:id', verifyUser, async (req: TaskRequest, res) => {
+    const loggedUser = req.user;
+    if(!loggedUser){
+        throw new UnauthorizedException('Unauthorized');
+    }
+
+    res.send(await req.service?.findById(Number(req.params.id), loggedUser));
 })
-router.get('/findByDate', async (req: TaskRequest, res) => {
-    return res.send(await req.service?.findByDate(req.body));
+router.get('/findByDate/:date', verifyUser, async (req: TaskRequest, res) => {
+    const loggedUser = req.user;
+    if(!loggedUser){
+        throw new UnauthorizedException('Unauthorized');
+    }
+    
+    res.send(await req.service?.findByDate(req.params.date, loggedUser));
 })
-router.get('/findByState/:state', async (req: TaskRequest, res) => {
-    return res.send(await req.service?.findByState(req.params.state));
+router.get('/findByState/:state', verifyUser, async (req: TaskRequest, res) => {
+    const loggedUser = req.user;
+    if(!loggedUser){
+        throw new UnauthorizedException('Unauthorized');
+    }
+    
+    res.send(await req.service?.findByState(req.params.state, loggedUser));
 })
-router.post('/create', async (req: TaskRequest, res) => {
-    return res.send(await req.service?.create(req.body))
+router.post('/create', verifyUser, async (req: TaskRequest, res) => {
+    const loggedUser = req.user;
+    if(!loggedUser){
+        throw new UnauthorizedException('Unauthorized');
+    }
+    
+    res.send(await req.service?.create(req.body, loggedUser))
 })
 
 router.patch('/update', verifyUser, async (req: TaskRequest, res) => {
-    if(!req.user){
+    const loggedUser = req.user;
+    if(!loggedUser){
         throw new UnauthorizedException('Unauthorized');
     }
-    return res.send(await req.service?.update(req.body, req.user))
+    
+    res.send(await req.service?.update(req.body, loggedUser))
 })
 
 router.delete('/delete/:id', verifyUser, async(req: TaskRequest, res) => {
-    if(!req.user){
+    const loggedUser = req.user;
+    if(!loggedUser){
         throw new UnauthorizedException('Unauthorized');
     }
-    res.send(await req.service?.delete(Number(req.params.id), req.user))
+    
+    res.send(await req.service?.delete(Number(req.params.id), loggedUser))
 })
 
 export default router

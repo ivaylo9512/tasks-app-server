@@ -6,10 +6,10 @@ export default class UnauthorizedException extends Error{
         Error.captureStackTrace(this, this.constructor);
 
         this.name = this.constructor.name;
-        this.status = 401
+        this.status = 401;
     }
 
-    statusCode() {
-        return this.status
+    statusCode(){
+        return this.status;
     }
 } 
