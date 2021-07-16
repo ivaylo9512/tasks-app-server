@@ -4,6 +4,7 @@ import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
 import TaskService from "./base/task-service";
 import { LoggedUser } from "src/types";
 import UnauthorizedException from "../exceptions/unauthorized";
+import { User } from "../entities/user";
 
 export default class TaskServiceImpl implements TaskService{
     em : EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>
@@ -12,20 +13,30 @@ export default class TaskServiceImpl implements TaskService{
         this.em = em;
     }  
 
-    async findById(id: number): Promise<Task | null> {
-        return await this.em.findOneOrFail(Task, { id });
+    async findById(id: number, loggedUser: LoggedUser): Promise<Task | null> {
+        const task = await this.em.findOneOrFail(Task, { id }, ['owner']);
+        
+        if(task.owner.id != loggedUser.id && loggedUser.role != 'admin'){
+            throw new UnauthorizedException('Unauthorized');
+        }
+
+        return task;
     }
     
-    async findByDate(date: Date): Promise<Task[]> {
-        return await this.em.find(Task, { eventDate: date });
+    async findByDate(date: string, loggedUser: LoggedUser): Promise<Task[]> {
+        return await this.em.find(Task, { eventDate: date, owner: loggedUser.id });
     }
 
-    async findByState(state: string): Promise<Task[]>{
-        return await this.em.find(Task, {state});
+    async findByState(state: string, loggedUser: LoggedUser): Promise<Task[]>{
+        return await this.em.find(Task, { state, owner: loggedUser.id});
     }
 
-    async create(taskInput: TaskInput): Promise<Task> {
+    async create(taskInput: TaskInput, loggedUser: LoggedUser): Promise<Task> {
         const task = this.em.create(Task, taskInput);
+
+        const user = this.em.getReference(User, loggedUser.id);
+        task.owner = user;
+        
         await this.em.persist(task).flush();
         
         return task;

@@ -28,3 +28,6 @@ declare global {
       }
     }
 }
+declare module 'jsonwebtoken' {
+    function verify(token: string, secretOrPublicKey: Secret, options?: VerifyOptions): LoggedUser;
+}
