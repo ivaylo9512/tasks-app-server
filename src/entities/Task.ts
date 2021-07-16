@@ -25,21 +25,21 @@ export class Task {
   @Property({ type: 'date', nullable: true })
   alertAt?: Date;
 
-  @Field(() => Date)
+  @Field(() => String, { nullable: true })
   @Property({ type: DateType, nullable: true })
   eventDate?: Date;
 
-  @Field(() => String)
-  @Property({ type: TimeType})
-  from: TimeType;
+  @Field(() => String, { nullable: true })
+  @Property({ type: TimeType, nullable: true})
+  from?: TimeType;
 
-  @Field(() => String)
-  @Property({ type: TimeType})
-  to: TimeType;
+  @Field(() => String, { nullable: true })
+  @Property({ type: TimeType, nullable: true})
+  to?: TimeType;
 
   @Field(() => String)
   @Property({ type: 'text' })
-  state: string;
+  state!: string;
 
   @ManyToOne({ entity: () => User })
   @Field(() => User)

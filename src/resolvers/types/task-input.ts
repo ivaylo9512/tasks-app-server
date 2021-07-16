@@ -2,14 +2,18 @@ import { InputType, Field } from "type-graphql"
 
 @InputType()
 export class TaskInput {
-    @Field()
+    @Field({ nullable: true })
     id?: number
+    @Field({ nullable: true })
+    from?: string
+    @Field({ nullable: true })
+    to?: string
     @Field()
-    from: Date
+    state!: string
+    @Field({ nullable: true })
+    alertAt?: Date
     @Field()
-    to: Date
-    @Field()
-    daily: string
-    @Field()
-    alertAt: Date
+    name!: string
+    @Field({ nullable: true })
+    eventDate?: string
 }
