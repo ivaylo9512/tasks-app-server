@@ -29,7 +29,7 @@ export class TaskResolver {
     }
 
     @Query(() => [Task])
-    async getTasksByState(
+    async tasksByState(
         @Arg('state') state: string,
         @Ctx() {services: { taskService }, req}: ApolloContext
     ): Promise<Task[]>{
@@ -60,7 +60,7 @@ export class TaskResolver {
 
     @Mutation(() => Boolean)
     async deleteTask(
-        @Arg('id') id: number,
+        @Arg('id', () => Int) id: number,
         @Ctx() { services: { taskService }, req }: ApolloContext
     ): Promise<boolean>{
         const loggedUser = TaskResolver.getUserFromToken(req.headers?.authorization);

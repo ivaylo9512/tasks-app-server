@@ -25,9 +25,9 @@ export class Task {
   @Property({ type: 'date', nullable: true })
   alertAt?: Date;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => DateType, { nullable: true })
   @Property({ type: DateType, nullable: true })
-  eventDate?: Date;
+  eventDate?: DateType;
 
   @Field(() => String, { nullable: true })
   @Property({ type: TimeType, nullable: true})

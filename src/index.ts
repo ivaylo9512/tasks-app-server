@@ -1,6 +1,6 @@
 import './utils/load-env'
 import 'reflect-metadata';
-import { MikroORM, RequestContext } from '@mikro-orm/core';
+import { MikroORM, RequestContext, DateType } from '@mikro-orm/core';
 import mikroConfig from './mikro-orm.config';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
@@ -13,6 +13,7 @@ import UserService from './service/user-service-impl';
 import taskRouter from './routers/task-routes';
 import userRouter from './routers/user-routes';
 import './utils/authenticate'
+import { DateTypeScalar } from './scalars/date-time';
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
@@ -47,7 +48,8 @@ const main = async () => {
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
             resolvers: [TaskResolver],
-            validate: false
+            validate: false,
+            scalarsMap: [{ type: DateType, scalar: DateTypeScalar }],
         }),
         context: ({req, res}): ApolloContext => ({ 
             services: {
