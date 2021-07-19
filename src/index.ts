@@ -14,6 +14,7 @@ import taskRouter from './routers/task-routes';
 import userRouter from './routers/user-routes';
 import './utils/authenticate'
 import { DateTypeScalar } from './scalars/date-time';
+import multer from 'multer';
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
@@ -27,7 +28,10 @@ const main = async () => {
         origin: 'http://localhost:3000',
         credentials: true
     }))
-    
+
+    multer({ dest: 'src/pubilc' })
+    app.use(express.static('src/public'));
+
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
