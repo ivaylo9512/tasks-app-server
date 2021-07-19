@@ -11,7 +11,7 @@ export default {
         path: path.join(__dirname, './migrations'), 
         pattern: /^[\w-]+\d+\.[tj]s$/,
     },
-    dbName: 'tasks-app2',
+    dbName: 'tasks-app',
     entities: [Task, User],
     metadataProvider: ReflectMetadataProvider,
     user: 'postgres',

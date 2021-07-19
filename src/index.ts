@@ -29,7 +29,7 @@ const main = async () => {
         credentials: true
     }))
 
-    multer({ dest: 'src/pubilc' })
+    multer({ dest: 'src/public' })
     app.use(express.static('src/public'));
 
     app.use(express.json());
