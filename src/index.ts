@@ -2,7 +2,7 @@ import './utils/load-env'
 import 'reflect-metadata';
 import { MikroORM, RequestContext, DateType } from '@mikro-orm/core';
 import mikroConfig from './mikro-orm.config';
-import express from 'express';
+import express, { ErrorRequestHandler } from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import { TaskResolver } from './resolvers/task';
@@ -15,6 +15,7 @@ import userRouter from './routers/user-routes';
 import './utils/authenticate'
 import { DateTypeScalar } from './scalars/date-time';
 import multer from 'multer';
+import { verifyMiddleware } from './utils/jwt-strategy'
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
@@ -35,6 +36,8 @@ const main = async () => {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
+    verifyMiddleware(app);
+
     app.use((req, res, next) => {
         RequestContext.create(orm.em, next);
     });
@@ -48,6 +51,10 @@ const main = async () => {
         req.service = userService;
         next();
     },userRouter);
+
+    app.use(((err, req, res, next) => {
+        res.status(err.status).send(err.message)
+    }) as ErrorRequestHandler)
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
