@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, ManyToOne, TimeType, DateType } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, DateType } from '@mikro-orm/core';
 import { User } from './user';
 import { ObjectType, Field, Int } from 'type-graphql';
 
@@ -27,15 +27,15 @@ export class Task {
 
   @Field(() => DateType, { nullable: true })
   @Property({ type: DateType, nullable: true })
-  eventDate?: DateType;
+  eventDate?: Date;
 
   @Field(() => String, { nullable: true })
-  @Property({ type: TimeType, nullable: true})
-  from?: TimeType;
+  @Property({ type: 'timeType', nullable: true})
+  from?: Date;
 
   @Field(() => String, { nullable: true })
-  @Property({ type: TimeType, nullable: true})
-  to?: TimeType;
+  @Property({ type: 'timeType', nullable: true})
+  to?: Date;
 
   @Field(() => String)
   @Property({ type: 'text' })

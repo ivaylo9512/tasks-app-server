@@ -78,8 +78,6 @@ export const initialize = async () => {
     });
 
     apolloServer.applyMiddleware({ app })
-    await userService.create({id: 1});
     
-    await taskService.create({ name: 'smth', state: 'event', eventDate: new Date().toISOString().split('T')[0], from: '20:30', to: '20:30', alertAt: new Date()}, {id: 1, role: 'admin'})
     return app;
 }

@@ -4,7 +4,7 @@ import { Task } from '../entities/task';
 import { TaskInput } from './types/task-input';
 import UnauthorizedException from '../exceptions/unauthorized';
 import { verify } from 'jsonwebtoken';
-import { jwtSecret } from '../utils/jwt-strategy';
+import { jwtSecret } from '../utils/authenticate';
 
 @Resolver()
 export class TaskResolver {

@@ -24,7 +24,7 @@ export default class TaskServiceImpl implements TaskService{
     }
     
     async findByDate(date: string, loggedUser: LoggedUser): Promise<Task[]> {
-        return await this.em.find(Task, { eventDate: date, owner: loggedUser.id });
+        return await this.em.find(Task, { eventDate: new Date(date), owner: loggedUser.id });
     }
 
     async findByState(state: string, loggedUser: LoggedUser): Promise<Task[]>{

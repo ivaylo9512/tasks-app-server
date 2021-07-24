@@ -2,7 +2,4 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  moduleNameMapper: {
-    "^app$": "<rootDir>/dist/app.js"
-  }
 }

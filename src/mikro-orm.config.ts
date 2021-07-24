@@ -4,18 +4,20 @@ import { MikroORM, ReflectMetadataProvider, Dictionary, IPrimaryKey } from '@mik
 import path from 'path';
 import { User } from './entities/user';
 import EntitiyNotFoundException from './exceptions/enitity-not-found';
+import { NODE_ENV } from './app';
 
 export default {
-    findOneOrFailHandler: (entityName: string, where: Dictionary | IPrimaryKey) => new EntitiyNotFoundException(`${entityName} not found!`),
+    findOneOrFailHandler: (entityName: string, _where: Dictionary | IPrimaryKey) => new EntitiyNotFoundException(`${entityName} not found!`),
     migrations: {
         path: path.join(__dirname, './migrations'), 
         pattern: /^[\w-]+\d+\.[tj]s$/,
+        dropTables: process.env.NODE_ENV === 'test',
     },
-    dbName: 'tasks-app',
+    dbName: process.env.NODE_ENV === 'test' ? 'tasks-app-test' : 'tasks-app',
     entities: [Task, User],
     metadataProvider: ReflectMetadataProvider,
     user: 'postgres',
     password: '1234',
-    debug: process.env.NODE_ENV !== 'production',
+    debug: NODE_ENV !== 'production',
     type: 'postgresql'
 } as Parameters<typeof MikroORM.init>[0];

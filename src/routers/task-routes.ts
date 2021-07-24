@@ -4,7 +4,7 @@ import UnauthorizedException from '../exceptions/unauthorized';
 
 const router = Router();
 
-router.get('/auth/findById/:id', async (req: TaskRequest, res: Response, next) => {
+router.get('/auth/findById/:id', async (req: TaskRequest, res: Response, _next) => {
     const loggedUser = req.user;
     if(!loggedUser){
         throw new UnauthorizedException('Unauthorized');
