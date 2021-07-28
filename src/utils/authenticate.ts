@@ -1,6 +1,5 @@
 import { ExtractJwt, Strategy} from 'passport-jwt';
-import { use, authenticate } from 'passport';
-import { Express } from 'express';
+import { use } from 'passport';
 
 export const jwtSecret = process.env.JWT_SECRET!
 
@@ -19,13 +18,3 @@ const strategy = new Strategy(opts, (payload, done) => {
     });
 })
 use(strategy);
-export const verifyMiddleware = (app: Express) => 
-    app.use('**/auth', (req, res, next) => 
-        authenticate(strategy, { session: false  }, (_error, user, info, _status) => {
-            if(info){
-                return res.status(401).send(info.message);
-            }
-            
-            req.user = user;
-            return next();
-    }))

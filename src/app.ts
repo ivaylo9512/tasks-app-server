@@ -2,18 +2,17 @@ import './utils/load-env'
 import 'reflect-metadata';
 import { MikroORM, RequestContext, DateType } from '@mikro-orm/core';
 import mikroConfig from './mikro-orm.config';
-import express, { ErrorRequestHandler } from 'express';
+import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import { TaskResolver } from './resolvers/task';
-import { ApolloContext, TaskRequest, UserRequest } from './types';
+import { ApolloContext } from './types';
 import cors from 'cors';
 import TaskService from './service/task-service-impl';
 import UserService from './service/user-service-impl';
 import './utils/authenticate'
 import { DateTypeScalar } from './scalars/date-time';
 import multer from 'multer';
-import { verifyMiddleware } from './utils/authenticate'
 
 export const NODE_ENV = process.env.NODE_ENV
 export const initialize = async () => {
@@ -28,6 +27,7 @@ export const initialize = async () => {
     const userService = new UserService(orm.em);
 
     const app = express();
+
     app.use(cors({
         origin: 'http://localhost:3000',
         credentials: true
@@ -35,8 +35,6 @@ export const initialize = async () => {
 
     multer({ dest: 'src/public' })
     app.use(express.static('src/public'));
-
-    verifyMiddleware(app);
 
     app.use((_req, _res, next) => {
         RequestContext.create(orm.em, next);
