@@ -10,8 +10,6 @@ import { ApolloContext, TaskRequest, UserRequest } from './types';
 import cors from 'cors';
 import TaskService from './service/task-service-impl';
 import UserService from './service/user-service-impl';
-import taskRouter from './routers/task-routes';
-import userRouter from './routers/user-routes';
 import './utils/authenticate'
 import { DateTypeScalar } from './scalars/date-time';
 import multer from 'multer';
@@ -38,29 +36,12 @@ export const initialize = async () => {
     multer({ dest: 'src/public' })
     app.use(express.static('src/public'));
 
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-
     verifyMiddleware(app);
 
     app.use((_req, _res, next) => {
         RequestContext.create(orm.em, next);
     });
       
-    app.use('/tasks', (req: TaskRequest, _res, next) => {
-        req.service = taskService;
-        next();
-    }, taskRouter);
-    
-    app.use('/users', (req: UserRequest, _res, next) => {
-        req.service = userService;
-        next();
-    },userRouter);
-
-    app.use(((err, _req, res, _next) => {
-        res.status(err.status).send(err.message)
-    }) as ErrorRequestHandler)
-
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
             resolvers: [TaskResolver],
@@ -78,6 +59,6 @@ export const initialize = async () => {
     });
 
     apolloServer.applyMiddleware({ app })
-    
+
     return app;
 }
