@@ -1,7 +1,10 @@
 import { InputType, Field } from "type-graphql"
 
 @InputType()
-export class TaskInput {
+export class UpdateInput {
+    @Field()
+    id: number
+    
     @Field()
     name: string
 
