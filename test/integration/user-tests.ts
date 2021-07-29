@@ -4,7 +4,7 @@ import { app } from './sequential.test';
 import UserInput from '../../src/resolvers/types/user-input';
 
 
-const [secondUser, thirdUser, forthUser]: UserInput[] = Array.from({length: 3}).map((_user, i) => ({
+const [secondUser, thirdUser, forthUser, fifthUser]: UserInput[] = Array.from({length: 4}).map((_user, i) => ({
     id: i + 2,
     role: 'user'
 }))
@@ -14,7 +14,7 @@ const admintUser = {
 }
 const admintToken = 'Bearer ' + getToken(admintUser)
 const secondToken = 'Bearer ' + getToken(secondUser)
-// const thirdToken = 'Bearer ' + getToken(thirdUser)
+const thirdToken = 'Bearer ' + getToken(thirdUser)
 const forthToken = 'Bearer ' + getToken(forthUser)
 
 let createManyMutation = (users: UserInput[]) => ({
@@ -27,6 +27,16 @@ let createManyMutation = (users: UserInput[]) => ({
     operationName: 'createManyUsers',
     variables: {
         users
+    }
+});
+
+let createDeleteMutation = (id: number) => ({
+    query: `mutation deleteUser($id: Int!){
+        deleteUser(id: $id)
+    }`,
+    operationName: 'deleteUser',
+    variables: {
+        id
     }
 });
 
@@ -91,9 +101,9 @@ const userTests = () => {
         const res = await request(app)
             .post('/graphql')
             .set('Authorization', admintToken)
-            .send(createManyMutation([thirdUser, forthUser]));
+            .send(createManyMutation([thirdUser, forthUser, fifthUser]));
             
-        expect(res.body.data.createManyUsers).toEqual([thirdUser, forthUser]);
+        expect(res.body.data.createManyUsers).toEqual([thirdUser, forthUser, fifthUser]);
     })
 
     it('should return error when creating user when user already exists', async() => {
@@ -114,5 +124,40 @@ const userTests = () => {
         expect(res.body.errors[0].message).toBe('Unauthorized.');
     })
 
+    it('should delete user when deleting from same user', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', forthToken)
+            .send(createDeleteMutation(4));
+
+        expect(res.body.data.deleteUser).toEqual(true);
+    })
+
+    it('should return unauthorized when deleting from same user', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createDeleteMutation(5));
+            
+        expect(res.body.errors[0].message).toEqual('Unauthorized.');
+    })
+
+    it('should delete when deleting from user that is admin', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', admintToken)
+            .send(createDeleteMutation(5));
+            
+        expect(res.body.data.deleteUser).toEqual(true);
+    })
+
+    it('should return error when deleting nonexistent user', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', admintToken)
+            .send(createDeleteMutation(4));
+            
+        expect(res.body.errors[0].message).toEqual(`User with id: 4 is not found.`);
+    })
 } 
 export default userTests;
