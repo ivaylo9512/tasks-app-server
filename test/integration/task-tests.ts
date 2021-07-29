@@ -88,6 +88,34 @@ const createTaskByIdQuery = (id: number) => ({
     }
 });
 
+const createTasksByDateQuery = (date: string) => ({
+    query: `query tasksByDate($date: String!){
+        tasksByDate(date: $date){
+            id,
+            name,
+            state,
+            eventDate,
+            from,
+            to,
+            alertAt
+        }   
+    }`,
+    operationName: 'tasksByDate',
+    variables: {
+        date
+    }
+});
+
+const createDeleteMutation = (id: number) => ({
+    query: `query deleteTask($id: Int!){
+        deleteTask(id: $id)   
+    }`,
+    operationName: 'deleteTask',
+    variables: {
+        id
+    }
+});
+
 const taskTests = () => {
     it('should create task', async() => {
         const res = await request(app)
@@ -165,6 +193,45 @@ const taskTests = () => {
             .send(createTaskByIdQuery(1));
             
         expect(res.body.data.taskById).toEqual(firstTask);
+    })
+
+    it('should return error when taskById with nonexistent task', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', admintToken)
+            .send(createTaskByIdQuery(222));
+            
+        expect(res.body.errors[0].message).toEqual(`Task not found.`);
+    })
+
+    it('should return tasks when taskByDate', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createTasksByDateQuery(dateString));
+            
+        expect(res.body.data.tasksByDate).toEqual([firstTask, secondTask, thirdTask, forthTask, ...tasks]);
+    })
+
+    it('should return empty array', async() => {
+        const newDate = new Date(date);
+        newDate.setDate(newDate.getDate() + 1);
+
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createTasksByDateQuery(newDate.toISOString().split('T')[0]));
+            
+        expect(res.body.data.tasksByDate).toEqual([]);
+    })
+
+    it('should delete task', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createDeleteMutation(4));
+            
+        expect(res.body.data.deleteTask).toBe(true);
     })
 }
 
