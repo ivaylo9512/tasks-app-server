@@ -301,7 +301,6 @@ const taskTests = () => {
             .set('Authorization', secondToken)
             .send(createUpdateTaskMutation(updatedFirstTask));
 
-            console.log(res);
         expect(res.body.data.updateTask).toEqual(updatedFirstTask);
     })
 

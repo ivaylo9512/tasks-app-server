@@ -1,7 +1,7 @@
 import { InputType, Field } from "type-graphql"
 
 @InputType()
-export class TaskInput {
+export default class TaskInput {
     @Field()
     name: string
 
@@ -15,8 +15,11 @@ export class TaskInput {
     to?: string
 
     @Field({ nullable: true })
-    alertAt?: Date
+    alertAt?: string
 
     @Field({ nullable: true })
     eventDate?: string
+
+    @Field({ nullable: true })
+    owner?: number
 }

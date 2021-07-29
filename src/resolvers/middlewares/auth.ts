@@ -18,14 +18,28 @@ const authenticate = (async (resolve, parent, args, context: ApolloContext, info
     return await resolve(parent, args, context, info)
 }) as IMiddlewareFunction
 
+const getJwtUser = (async (resolve, parent, args, context: ApolloContext, info) => {
+    getUserFromToken(context.req, context);
+
+    return await resolve(parent, args, context, info)
+}) as IMiddlewareFunction
+
 const authMiddleware: AuthMiddleware = {
     Mutation: {
         deleteTask: authenticate,
         createTask: authenticate,
+        createTasks: authenticate,
+        updateTask: authenticate,
+        deleteUser: authenticate,
+        createUsers: authenticate,
+        login: getJwtUser,
+        register: getJwtUser,
     },
     Query: {
         tasksByDate: authenticate,
         tasksByState: authenticate,
+        taskById: authenticate,
+        userById: authenticate,
     }
 }
 

@@ -1,10 +1,10 @@
 import { InputType, Field } from "type-graphql"
 
 @InputType()
-export class UpdateInput {
+export default class UpdateInput {
     @Field()
     id: number
-    
+
     @Field()
     name: string
 
@@ -18,7 +18,7 @@ export class UpdateInput {
     to?: string
 
     @Field({ nullable: true })
-    alertAt?: Date
+    alertAt?: string
 
     @Field({ nullable: true })
     eventDate?: string
