@@ -1,7 +1,7 @@
 import { initialize } from "./app";
 
 const start = async () => {
-    const app = await initialize();
+    const { app } = await initialize();
     const port = process.env.PORT || 8099;
     
     app.listen(port, () =>{
