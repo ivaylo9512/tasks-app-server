@@ -1,84 +1,64 @@
 import { Resolver, Query, Ctx, Arg, Mutation, Int } from 'type-graphql';
 import { ApolloContext } from '../types';
 import { Task } from '../entities/task';
-import { TaskInput } from './types/task-input';
-import UnauthorizedException from '../exceptions/unauthorized';
-import { verify } from 'jsonwebtoken';
-import { jwtSecret } from '../utils/authenticate';
+import TaskInput from './types/task-input';
+import UpdateInput from './types/update-input';
 
 @Resolver()
-export class TaskResolver {
+export default class TaskResolver {
     @Query(() => Task, { nullable: true })
     async taskById(
         @Arg('id', () => Int) id: number,
-        @Ctx() { services: { taskService }, req }: ApolloContext
+        @Ctx() { taskService, foundUser }: ApolloContext
     ): Promise<Task | null> {
-        const loggedUser = TaskResolver.getUserFromToken(req.headers?.authorization);
-    
-        return await taskService.findById(id, loggedUser);
+        return await taskService.findById(id, foundUser!);
     }
 
     @Query(() => [Task])
     async tasksByDate(
         @Arg('date') date: string,
-        @Ctx() { services: { taskService }, req}: ApolloContext
+        @Ctx() { taskService, foundUser }: ApolloContext
     ): Promise<Task[]> {
-        const loggedUser = TaskResolver.getUserFromToken(req.headers?.authorization);
-
-        return await taskService.findByDate(date, loggedUser);
+        return await taskService.findByDate(date, foundUser!);
     }
 
     @Query(() => [Task])
     async tasksByState(
         @Arg('state') state: string,
-        @Ctx() {services: { taskService }, req}: ApolloContext
+        @Ctx() {taskService, foundUser}: ApolloContext
     ): Promise<Task[]>{
-        const loggedUser = TaskResolver.getUserFromToken(req.headers?.authorization);
-
-        return await taskService.findByState(state, loggedUser);
+        return await taskService.findByState(state, foundUser!);
     }
 
     @Mutation(() => Task)
     async createTask(
         @Arg('taskInput') taskInput: TaskInput,
-        @Ctx() { services: { taskService }, req }: ApolloContext
+        @Ctx() { taskService, foundUser }: ApolloContext
     ): Promise<Task>{
-        const loggedUser = TaskResolver.getUserFromToken(req.headers?.authorization);
+        return await taskService.create(taskInput, foundUser!);
+    }
 
-        return await taskService.create(taskInput, loggedUser);
+    @Mutation(() => [Task])
+    async createTasks(
+        @Arg('taskInputs', () => [TaskInput]) taskInputs: TaskInput[],
+        @Ctx() { taskService, foundUser }: ApolloContext
+    ): Promise<Task[]>{
+        return await taskService.createMany(taskInputs, foundUser!);
     }
 
     @Mutation(() => Task)
     async updateTask(
-        @Arg('taskInput') taskInput: TaskInput,
-        @Ctx() {services: { taskService }, req}: ApolloContext
+        @Arg('updateInput') updateInput: UpdateInput,
+        @Ctx() { taskService, foundUser }: ApolloContext
     ): Promise<Task>{
-        const loggedUser = TaskResolver.getUserFromToken(req.headers?.authorization);
-
-        return await taskService.update(taskInput, loggedUser);
+        return await taskService.update(updateInput, foundUser!);
     }
 
     @Mutation(() => Boolean)
     async deleteTask(
         @Arg('id', () => Int) id: number,
-        @Ctx() { services: { taskService }, req }: ApolloContext
+        @Ctx() { taskService, foundUser }: ApolloContext
     ): Promise<boolean>{
-        const loggedUser = TaskResolver.getUserFromToken(req.headers?.authorization);
-
-        return await taskService.delete(id, loggedUser)
-    }
-
-    static getUserFromToken(token?: string) {
-        if(!token){
-            throw new UnauthorizedException('Unauthorized');
-        }
-        token = token.split(' ')[1];
-    
-        const loggedUser = verify(token, jwtSecret);
-        if(!loggedUser){
-            throw new UnauthorizedException('Unauthorized')
-        }
-
-        return loggedUser;
+        return await taskService.delete(id, foundUser!)
     }
 }
