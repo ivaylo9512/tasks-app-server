@@ -1,7 +1,7 @@
 import { app } from "./sequential.test"
 import request from "supertest"
 import TaskInput from "../../src/resolvers/types/task-input"
-import { secondToken, admintToken } from "./user-tests";
+import { secondToken, admintToken, thirdToken } from "./user-tests";
 
 interface Task extends TaskInput {
     id?: number,
@@ -70,6 +70,24 @@ const createManyTasksMutation = (taskInputs: Task[]) => ({
     }
 });
 
+const createTaskByIdQuery = (id: number) => ({
+    query: `query taskById($id: Int!){
+        taskById(id: $id){
+            id,
+            name,
+            state,
+            eventDate,
+            from,
+            to,
+            alertAt
+        }   
+    }`,
+    operationName: 'taskById',
+    variables: {
+        id
+    }
+});
+
 const taskTests = () => {
     it('should create task', async() => {
         const res = await request(app)
@@ -99,7 +117,54 @@ const taskTests = () => {
         const expectedIds = Array.from({length: tasksArray.length}, (_v, i) => i + 2);
 
         expect(ids).toEqual(expectedIds);
-        expect(res.body.data.createTasks).toBe([secondTask, thirdTask, forthTask, ...tasks]);
+        expect(res.body.data.createTasks).toEqual(tasksArray);
+    })
+
+    it('should return error when creating tasks with nonexistent owner', async() => {
+        const taskInputs = [secondTask, thirdTask, forthTask].map(task => ({...task, owner: 15, id: undefined}));
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', admintToken)
+            .send(createManyTasksMutation(taskInputs));
+
+        expect(res.body.errors[0].message).toBe(`User with id: 15 doesn't exist.`);
+    })
+
+    it('should return Unauthorized when creating tasks with user that is not admin', async() => {
+        const taskInputs = [secondTask, thirdTask, forthTask, ...tasks].map(task => ({...task, owner: 3, id: undefined}));
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createManyTasksMutation(taskInputs));
+
+        expect(res.body.errors[0].message).toBe('Unauthorized.');
+    })
+
+    it('should return task when taskById', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createTaskByIdQuery(1));
+
+        expect(res.body.data.taskById).toEqual(firstTask);
+    })
+
+    it('should return Unauthorized task when taskById with different logged user id that is not admin', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', thirdToken)
+            .send(createTaskByIdQuery(1));
+            
+        expect(res.body.errors[0].message).toBe('Unauthorized.');
+    })
+
+    it('should return task when taskById with user with different logged user id that is admin', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', admintToken)
+            .send(createTaskByIdQuery(1));
+            
+        expect(res.body.data.taskById).toEqual(firstTask);
     })
 }
 
