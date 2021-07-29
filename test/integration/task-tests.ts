@@ -106,8 +106,26 @@ const createTasksByDateQuery = (date: string) => ({
     }
 });
 
+const createTasksByStateQuery = (state: string) => ({
+    query: `query tasksByState($state: String!){
+        tasksByState(state: $state){
+            id,
+            name,
+            state,
+            eventDate,
+            from,
+            to,
+            alertAt
+        }   
+    }`,
+    operationName: 'tasksByState',
+    variables: {
+        state
+    }
+});
+
 const createDeleteMutation = (id: number) => ({
-    query: `query deleteTask($id: Int!){
+    query: `mutation deleteTask($id: Int!){
         deleteTask(id: $id)   
     }`,
     operationName: 'deleteTask',
@@ -213,6 +231,41 @@ const taskTests = () => {
         expect(res.body.data.tasksByDate).toEqual([firstTask, secondTask, thirdTask, forthTask, ...tasks]);
     })
 
+    it('should return tasks when tasksByState with daily state', async() => {
+        const dailyTasks = [firstTask, secondTask, thirdTask, forthTask, ...tasks].filter(task => task.state == 'daily');
+        console.log(dailyTasks);
+        
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createTasksByStateQuery('daily'));
+            
+        expect(res.body.data.tasksByState).toEqual(dailyTasks);
+    })
+
+    it('should return tasks when tasksByState with daily state', async() => {
+        const goalsTasks = [firstTask, secondTask, thirdTask, forthTask, ...tasks].filter(task => task.state == 'goals');
+        
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createTasksByStateQuery('goals'));
+            
+        expect(res.body.data.tasksByState).toEqual(goalsTasks);
+    })
+
+    
+    it('should return tasks when tasksByState with daily state', async() => {
+        const eventTasks = [firstTask, secondTask, thirdTask, forthTask, ...tasks].filter(task => task.state == 'event');
+        
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createTasksByStateQuery('event'));
+            
+        expect(res.body.data.tasksByState).toEqual(eventTasks);
+    })
+
     it('should return empty array', async() => {
         const newDate = new Date(date);
         newDate.setDate(newDate.getDate() + 1);
@@ -226,6 +279,24 @@ const taskTests = () => {
     })
 
     it('should delete task', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createDeleteMutation(4));
+            
+        expect(res.body.data.deleteTask).toBe(true);
+    })
+    
+    it('should return Unauthorized when deleting task with user that has different id and is not admin', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', thirdToken)
+            .send(createDeleteMutation(4));
+            
+        expect(res.body.errors[0].message).toBe('Unauthorized.');
+    })
+
+    it('should delete task with user that has different id and is admin', async() => {
         const res = await request(app)
             .post('/graphql')
             .set('Authorization', secondToken)
