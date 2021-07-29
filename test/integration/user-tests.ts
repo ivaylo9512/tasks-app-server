@@ -40,6 +40,19 @@ let createDeleteMutation = (id: number) => ({
     }
 });
 
+let createUserByIdQuery = (id: number) => ({
+    query: `query userById($id: Int!){
+        userById(id: $id){
+            id,
+            role
+        }
+    }`,
+    operationName: 'userById',
+    variables: {
+        id
+    }
+});
+
 let registerMutation = {
     query: `mutation register{
             register{
@@ -158,6 +171,42 @@ const userTests = () => {
             .send(createDeleteMutation(4));
             
         expect(res.body.errors[0].message).toEqual(`User with id: 4 is not found.`);
+    })
+
+    it('should return user when userById with same token id', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', thirdToken)
+            .send(createUserByIdQuery(3));
+            
+        expect(res.body.data.userById).toEqual(thirdUser);
+    })
+
+    it('should return error when userById with different user that is not admin', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', thirdToken)
+            .send(createUserByIdQuery(2));
+            
+        expect(res.body.errors[0].message).toEqual('Unauthorized.');
+    })
+
+    it('should return user when userById with different user that is admin', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', admintToken)
+            .send(createUserByIdQuery(2));
+
+        expect(res.body.data.userById).toEqual(secondUser);
+    })
+
+    it('should return error when userById with nonexistent user', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', admintToken)
+            .send(createUserByIdQuery(222));
+            
+        expect(res.body.errors[0].message).toEqual(`User not found.`);
     })
 } 
 export default userTests;
