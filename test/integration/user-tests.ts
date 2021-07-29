@@ -12,9 +12,9 @@ const admintUser = {
     id: 1,
     role: 'admin'
 }
-const admintToken = 'Bearer ' + getToken(admintUser)
-const secondToken = 'Bearer ' + getToken(secondUser)
-const thirdToken = 'Bearer ' + getToken(thirdUser)
+export const admintToken = 'Bearer ' + getToken(admintUser)
+export const secondToken = 'Bearer ' + getToken(secondUser)
+export const thirdToken = 'Bearer ' + getToken(thirdUser)
 const forthToken = 'Bearer ' + getToken(forthUser)
 
 let createManyMutation = (users: UserInput[]) => ({
@@ -207,6 +207,59 @@ const userTests = () => {
             .send(createUserByIdQuery(222));
             
         expect(res.body.errors[0].message).toEqual(`User not found.`);
+    })
+
+    
+    it('should return error when userById wtihout token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .send(createUserByIdQuery(1))
+
+        expect(res.body.errors[0].message).toBe('No auth token');
+    })
+
+    it('should return error when userById with incorrect token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer incorrect token')
+            .send(createUserByIdQuery(1))
+
+        expect(res.body.errors[0].message).toBe('jwt malformed');
+    })
+
+    it('should return error when deleting user wtihout token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .send(createDeleteMutation(1))
+
+        expect(res.body.errors[0].message).toBe('No auth token');
+    })
+
+    it('should return error when deleting user with incorrect token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer incorrect token')
+            .send(createDeleteMutation(1))
+
+        expect(res.body.errors[0].message).toBe('jwt malformed');
+    })
+
+
+    it('should return error when creating user wtihout token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .send(createManyMutation([fifthUser]));
+
+        expect(res.body.errors[0].message).toBe('No auth token');
+    })
+
+    it('should return error when creating user with incorrect token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer incorrect token')
+            .send(createManyMutation([fifthUser]))
+
+        expect(res.body.errors[0].message).toBe('jwt malformed');
     })
 } 
 export default userTests;
