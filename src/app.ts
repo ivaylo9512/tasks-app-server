@@ -1,18 +1,23 @@
 import './utils/load-env'
 import 'reflect-metadata';
+import './utils/jwt'
 import { MikroORM, RequestContext, DateType } from '@mikro-orm/core';
 import mikroConfig from './mikro-orm.config';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
-import { TaskResolver } from './resolvers/task';
+import TaskResolver from './resolvers/task';
+import UserResolver from './resolvers/user';
 import { ApolloContext } from './types';
 import cors from 'cors';
 import TaskService from './service/task-service-impl';
 import UserService from './service/user-service-impl';
-import './utils/authenticate'
 import { DateTypeScalar } from './scalars/date-time';
 import multer from 'multer';
+import { Task } from './entities/task';
+import User from './entities/user';
+import { applyMiddleware } from 'graphql-middleware';
+import authMiddleware from './resolvers/middlewares/auth';
 
 export const NODE_ENV = process.env.NODE_ENV
 export const initialize = async () => {
@@ -23,8 +28,8 @@ export const initialize = async () => {
     }
     await orm.getMigrator().up();
 
-    const taskService = new TaskService(orm.em);
-    const userService = new UserService(orm.em);
+    const taskService = new TaskService(orm.em.getRepository(Task));
+    const userService = new UserService(orm.em.getRepository(User));
 
     const app = express();
 
@@ -41,16 +46,14 @@ export const initialize = async () => {
     });
       
     const apolloServer = new ApolloServer({
-        schema: await buildSchema({
-            resolvers: [TaskResolver],
+        schema: applyMiddleware(await buildSchema({
+            resolvers: [TaskResolver, UserResolver],
             validate: false,
             scalarsMap: [{ type: DateType, scalar: DateTypeScalar }],
-        }),
+        }), authMiddleware),
         context: ({req, res}): ApolloContext => ({ 
-            services: {
-                userService, 
-                taskService
-            }, 
+            userService, 
+            taskService,
             req, 
             res
         })
@@ -58,5 +61,8 @@ export const initialize = async () => {
 
     apolloServer.applyMiddleware({ app })
 
-    return app;
+    return {
+        app,
+        orm
+    };
 }

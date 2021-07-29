@@ -1,10 +1,11 @@
 import { Entity, PrimaryKey, OneToMany, Collection, Property } from "@mikro-orm/core";
 import { Task } from "./task";
 import { ObjectType, Field, Int } from "type-graphql";
+import UserRepositoryImpl from "../repositories/user-repository-impl";
 
-@Entity()
 @ObjectType()
-export class User{
+@Entity({ customRepository: () => UserRepositoryImpl })
+export default class User{
     @Field(() => Int)
     @PrimaryKey()
     id!: Number;
@@ -20,4 +21,8 @@ export class User{
     @Field(() => Date)
     @Property({ type: 'date', onUpdate: () => new Date() })
     updatedAt = new Date();
+
+    @Field(() => String)
+    @Property({ type: 'text' })
+    role = 'user';
 }

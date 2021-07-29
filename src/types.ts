@@ -6,10 +6,15 @@ import UserEntity from './entities/user';
 export type ApolloContext = {
     userService: UserService;
     taskService: TaskService
-    foundUser?: UserEntity;   
+    foundUser?: UserEntity;
+    jwtUser?: JwtUser;   
     req: Request,
     res: Response
 }
+export type JwtUser = {
+    id: number,
+    role: string
+}
 declare module 'jsonwebtoken' {
-    function verify(token: string, secretOrPublicKey: Secret, options?: VerifyOptions): LoggedUser;
+    function verify(token: string, secretOrPublicKey: Secret, options?: VerifyOptions): JwtUser;
 }
