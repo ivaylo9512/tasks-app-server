@@ -8,10 +8,12 @@ const [secondUser, thirdUser, forthUser, fifthUser]: UserInput[] = Array.from({l
     id: i + 2,
     role: 'user'
 }))
+
 const admintUser = {
     id: 1,
     role: 'admin'
 }
+
 export const admintToken = 'Bearer ' + getToken(admintUser)
 export const secondToken = 'Bearer ' + getToken(secondUser)
 export const thirdToken = 'Bearer ' + getToken(thirdUser)
@@ -208,7 +210,6 @@ const userTests = () => {
             
         expect(res.body.errors[0].message).toEqual(`User not found.`);
     })
-
     
     it('should return error when userById wtihout token', async() => {
         const res = await request(app)

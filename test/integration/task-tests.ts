@@ -23,7 +23,7 @@ const [firstTask, secondTask, thirdTask, forthTask, ...tasks]: Task[] = Array.fr
     alertAt: new Date().toISOString()
 }));
 
-const [updatedFirstTask, updatedSecondTask, updatedThirdTask, updatedForthTask]: Task[] = Array.from({length: 4}).map((_task, i) => ({
+const [updatedFirstTask, updatedSecondTask]: Task[] = Array.from({length: 2}).map((_task, i) => ({
     id: i + 1,
     name: 'nameUpdated' + i,
     state: states[Math.floor(i % 3 * Math.random())],
@@ -52,7 +52,7 @@ const createTaskMutation = (taskInput: Task) => ({
     }
 });
 
-const createManyTasksMutation = (taskInputs: Task[]) => ({
+const createTasksMutation = (taskInputs: Task[]) => ({
     query: `mutation createTasks($taskInputs: [TaskInput!]!){
         createTasks(taskInputs: $taskInputs){
             id,
@@ -124,6 +124,24 @@ const createTasksByStateQuery = (state: string) => ({
     }
 });
 
+const createUpdateTaskMutation = (updateInput: Task) => ({
+    query: `mutation updateTask($updateInput: UpdateInput!){
+        updateTask(updateInput: $updateInput){
+            id,
+            name,
+            state,
+            eventDate,
+            from,
+            to,
+            alertAt
+        }   
+    }`,
+    operationName: 'updateTask',
+    variables: {
+        updateInput
+    }
+});
+
 const createDeleteMutation = (id: number) => ({
     query: `mutation deleteTask($id: Int!){
         deleteTask(id: $id)   
@@ -155,7 +173,7 @@ const taskTests = () => {
         const res = await request(app)
             .post('/graphql')
             .set('Authorization', admintToken)
-            .send(createManyTasksMutation(taskInputs));
+            .send(createTasksMutation(taskInputs));
 
         const resTasks = res.body.data.createTasks;
 
@@ -171,7 +189,7 @@ const taskTests = () => {
         const res = await request(app)
             .post('/graphql')
             .set('Authorization', admintToken)
-            .send(createManyTasksMutation(taskInputs));
+            .send(createTasksMutation(taskInputs));
 
         expect(res.body.errors[0].message).toBe(`User with id: 15 doesn't exist.`);
     })
@@ -181,7 +199,7 @@ const taskTests = () => {
         const res = await request(app)
             .post('/graphql')
             .set('Authorization', secondToken)
-            .send(createManyTasksMutation(taskInputs));
+            .send(createTasksMutation(taskInputs));
 
         expect(res.body.errors[0].message).toBe('Unauthorized.');
     })
@@ -233,7 +251,6 @@ const taskTests = () => {
 
     it('should return tasks when tasksByState with daily state', async() => {
         const dailyTasks = [firstTask, secondTask, thirdTask, forthTask, ...tasks].filter(task => task.state == 'daily');
-        console.log(dailyTasks);
         
         const res = await request(app)
             .post('/graphql')
@@ -278,6 +295,34 @@ const taskTests = () => {
         expect(res.body.data.tasksByDate).toEqual([]);
     })
 
+    it('should update task', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', secondToken)
+            .send(createUpdateTaskMutation(updatedFirstTask));
+
+            console.log(res);
+        expect(res.body.data.updateTask).toEqual(updatedFirstTask);
+    })
+
+    it('should return Unauthorized when updating with user that has different id and is not admin', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', thirdToken)
+            .send(createUpdateTaskMutation(updatedSecondTask));
+            
+        expect(res.body.errors[0].message).toEqual('Unauthorized.');
+    })
+
+    it('should update task when updating with user that has different id and is admin', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', admintToken)
+            .send(createUpdateTaskMutation(updatedSecondTask));
+            
+        expect(res.body.data.updateTask).toEqual(updatedSecondTask);
+    })
+
     it('should delete task', async() => {
         const res = await request(app)
             .post('/graphql')
@@ -303,6 +348,125 @@ const taskTests = () => {
             .send(createDeleteMutation(4));
             
         expect(res.body.data.deleteTask).toBe(true);
+    })
+
+    it('should return error when createTask wtihout token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .send(createTaskMutation({...firstTask, id: undefined}))
+
+        expect(res.body.errors[0].message).toBe('No auth token');
+    })
+
+    it('should return error when createTasks with incorrect token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer incorrect token')
+            .send(createTaskMutation({...firstTask, id: undefined}))
+
+        expect(res.body.errors[0].message).toBe('jwt malformed');
+    })
+
+    it('should return error when createTasks wtihout token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .send(createTasksMutation([{...firstTask, id: undefined}]))
+
+        expect(res.body.errors[0].message).toBe('No auth token');
+    })
+
+    it('should return error when createTasks with incorrect token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer incorrect token')
+            .send(createTasksMutation([{...firstTask, id: undefined}]))
+
+        expect(res.body.errors[0].message).toBe('jwt malformed');
+    })
+
+    it('should return error when deleting task wtihout token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .send(createDeleteMutation(1))
+
+        expect(res.body.errors[0].message).toBe('No auth token');
+    })
+
+    it('should return error when deleting task with incorrect token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer incorrect token')
+            .send(createDeleteMutation(1))
+
+        expect(res.body.errors[0].message).toBe('jwt malformed');
+    })
+
+    it('should return error when taskById wtihout token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .send(createTaskByIdQuery(1));
+
+        expect(res.body.errors[0].message).toBe('No auth token');
+    })
+
+    it('should return error when taskById with incorrect token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer incorrect token')
+            .send(createTaskByIdQuery(1));
+
+        expect(res.body.errors[0].message).toBe('jwt malformed');
+    })
+
+    it('should return error when tasksByDate wtihout token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .send(createTasksByDateQuery(dateString));
+
+        expect(res.body.errors[0].message).toBe('No auth token');
+    })
+
+    it('should return error when tasksByDate with incorrect token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer incorrect token')
+            .send(createTasksByDateQuery(dateString));
+
+        expect(res.body.errors[0].message).toBe('jwt malformed');
+    })
+
+    it('should return error when tasksByDate wtihout token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .send(createTasksByStateQuery('daily'));
+
+        expect(res.body.errors[0].message).toBe('No auth token');
+    })
+
+    it('should return error when tasksByDate with incorrect token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer incorrect token')
+            .send(createTasksByStateQuery('daily'));
+
+        expect(res.body.errors[0].message).toBe('jwt malformed');
+    })
+
+    it('should return error when updateTask wtihout token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .send(createUpdateTaskMutation(updatedFirstTask));
+
+        expect(res.body.errors[0].message).toBe('No auth token');
+    })
+
+    it('should return error when updateTask with incorrect token', async() => {
+        const res = await request(app)
+            .post('/graphql')
+            .set('Authorization', 'Bearer incorrect token')
+            .send(createUpdateTaskMutation(updatedFirstTask));
+
+        expect(res.body.errors[0].message).toBe('jwt malformed');
     })
 }
 
