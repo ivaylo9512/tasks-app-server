@@ -18,13 +18,13 @@ export const thirdToken = 'Bearer ' + getToken(thirdUser)
 const forthToken = 'Bearer ' + getToken(forthUser)
 
 let createManyMutation = (users: UserInput[]) => ({
-    query: `mutation createManyUsers($users: [UserInput!]!){
-        createManyUsers(users: $users){
+    query: `mutation createUsers($users: [UserInput!]!){
+        createUsers(users: $users){
             id,
             role
         }
     }`,
-    operationName: 'createManyUsers',
+    operationName: 'createUsers',
     variables: {
         users
     }
@@ -116,7 +116,7 @@ const userTests = () => {
             .set('Authorization', admintToken)
             .send(createManyMutation([thirdUser, forthUser, fifthUser]));
             
-        expect(res.body.data.createManyUsers).toEqual([thirdUser, forthUser, fifthUser]);
+        expect(res.body.data.createUsers).toEqual([thirdUser, forthUser, fifthUser]);
     })
 
     it('should return error when creating user when user already exists', async() => {
