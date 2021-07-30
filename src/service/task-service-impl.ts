@@ -55,6 +55,39 @@ export default class TaskServiceImpl implements TaskService{
         return task;
     }
 
+    async createMany(taskInputs: TaskInput[], loggedUser: User) {
+        if(loggedUser.role != 'admin'){
+            throw new UnauthorizedException('Unauthorized.')
+        }
+
+        const tasks = taskInputs.map(task => {
+            const { name, state, alertAt, eventDate, from, to, owner } = task;
+            
+            return this.repo.create({
+                name,
+                state, 
+                alertAt, 
+                eventDate: eventDate ? new Date(eventDate) : undefined, 
+                from, 
+                to,
+                owner
+            });
+        })
+        
+        try{
+            await this.repo.persist(tasks).flush();            
+        }catch(err){
+            if(err.code == 23503){
+                var reg = /\((.*?)\)/g;
+                this.repo.remove(tasks);
+                throw new EntitiyNotFoundException(`User with id: ${reg.exec(err.detail) && reg.exec(err.detail)?.[1]} doesn't exist.`)
+            }
+            throw err;
+        }
+        
+        return tasks;
+    }
+
     async update(taskInput: UpdateInput, loggedUser: User) {
         const {id, name, state, alertAt, eventDate, from, to} = taskInput;
         const task = await this.repo.findById(id, ['owner']);

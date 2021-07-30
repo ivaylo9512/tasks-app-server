@@ -8,6 +8,7 @@ export default interface TaskService {
     findByDate(date: string, loggedUser: User): Promise<Task[]>;
     findByState(state: string, loggedUser: User): Promise<Task[]>;
     create(taskInput: TaskInput, loggedUser: User): Promise<Task>;
+    createMany(taskInput: TaskInput[], loggedUser: User): Promise<Task[]>;
     update(taskInput: UpdateInput, loggedUser: User): Promise<Task>;
     delete(id: number, loggedUser: User): Promise<boolean>;
 }
