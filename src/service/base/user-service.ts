@@ -1,10 +1,10 @@
-import { User } from "src/entities/user";
-import { UserInput } from "src/resolvers/types/user-input";
-import { LoggedUser } from "src/types";
+import User from "../../entities/user";
+import { JwtUser } from "../../types";
+import UserInput from "../../resolvers/types/user-input";
 
 export default interface UserService {
-    findById(id: number): Promise<User | null>;
-    create(UserInput: UserInput): Promise<User>;
-    update(UserInput: UserInput, loggedUser: LoggedUser): Promise<User>;
-    delete(id: number, loggedUser: LoggedUser): Promise<boolean>;
+    findById(id: number, loggedUser: User): Promise<User>;
+    delete(id: number, loggedUser: User): Promise<boolean>;
+    login(userFromToken: JwtUser): Promise<User>;
+    register(userInput: UserInput): Promise<User>;
 }
