@@ -73,4 +73,20 @@ export default class UserServiceImpl implements UserService{
         return true;
     }
 
+    
+    async verifyLoggedUser(id: number){
+        if(!id){
+            throw new UnauthorizedException('Unauthorized.');
+        }
+
+        const user = await this.repo.findOne({ id });
+
+        if(!user){
+            throw new UnauthorizedException('User from token is unavailable.');
+        }
+
+        return user;
+    }
+
+
 }

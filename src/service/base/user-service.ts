@@ -7,4 +7,5 @@ export default interface UserService {
     delete(id: number, loggedUser: User): Promise<boolean>;
     login(userFromToken: JwtUser): Promise<User>;
     register(userInput: UserInput): Promise<User>;
+    verifyLoggedUser(id?: number): Promise<User>;
 }
