@@ -1,12 +1,13 @@
-import { TaskInput } from '../../resolvers/types/task-input';
-import { Task } from 'src/entities/task';
-import { LoggedUser } from 'src/types';
+import TaskInput from '../../resolvers/types/task-input';
+import { Task } from '../../entities/task';
+import User from '../../entities/user';
+import UpdateInput from '../../resolvers/types/update-input';
 
 export default interface TaskService {
-    findById(id: number, loggedUser: LoggedUser): Promise<Task | null>;
-    findByDate(date: string, loggedUser: LoggedUser): Promise<Task[]>;
-    findByState(state: string, loggedUser: LoggedUser): Promise<Task[]>;
-    create(taskInput: TaskInput, loggedUser: LoggedUser): Promise<Task>;
-    update(taskInput: TaskInput, loggedUser: LoggedUser): Promise<Task>;
-    delete(id: number, loggedUser: LoggedUser): Promise<boolean>;
+    findById(id: number, loggedUser: User): Promise<Task | null>;
+    findByDate(date: string, loggedUser: User): Promise<Task[]>;
+    findByState(state: string, loggedUser: User): Promise<Task[]>;
+    create(taskInput: TaskInput, loggedUser: User): Promise<Task>;
+    update(taskInput: UpdateInput, loggedUser: User): Promise<Task>;
+    delete(id: number, loggedUser: User): Promise<boolean>;
 }

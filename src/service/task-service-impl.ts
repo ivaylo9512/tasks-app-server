@@ -1,77 +1,89 @@
-import { TaskInput } from "../resolvers/types/task-input";
-import { Task } from "../entities/task";
-import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
+import TaskInput from "../resolvers/types/task-input";
 import TaskService from "./base/task-service";
-import { LoggedUser } from "src/types";
 import UnauthorizedException from "../exceptions/unauthorized";
-import { User } from "../entities/user";
+import User  from "../entities/user";
+import UpdateInput from "../resolvers/types/update-input";
+import EntitiyNotFoundException from "../exceptions/enitity-not-found";
+import TaskRepository from "src/repositories/base/task-repository";
 
 export default class TaskServiceImpl implements TaskService{
-    em : EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>
+    repo : TaskRepository
     
-    constructor(em: EntityManager<any> & EntityManager<IDatabaseDriver<Connection>>){
-        this.em = em;
+    constructor(repo: TaskRepository){
+        this.repo = repo;
     }  
 
-    async findById(id: number, loggedUser: LoggedUser): Promise<Task | null> {
-        const task = await this.em.findOneOrFail(Task, { id }, ['owner']);
+    async findById(id: number, loggedUser: User) {
+        const task = await this.repo.findById(id, ['owner']);
         
         if(task.owner.id != loggedUser.id && loggedUser.role != 'admin'){
-            throw new UnauthorizedException('Unauthorized');
+            throw new UnauthorizedException('Unauthorized.');
         }
 
         return task;
     }
     
-    async findByDate(date: string, loggedUser: LoggedUser): Promise<Task[]> {
-        return await this.em.find(Task, { eventDate: new Date(date), owner: loggedUser.id });
+    async findByDate(date: string, loggedUser: User) {
+        return await this.repo.find({ 
+            eventDate: new Date(date), 
+            owner: loggedUser.id 
+        });
     }
 
-    async findByState(state: string, loggedUser: LoggedUser): Promise<Task[]>{
-        return await this.em.find(Task, { state, owner: loggedUser.id});
+    async findByState(state: string, loggedUser: User) {
+        return await this.repo.find({ 
+            state, owner: 
+            loggedUser.id
+        });
     }
 
-    async create(taskInput: TaskInput, loggedUser: LoggedUser): Promise<Task> {
-        const task = this.em.create(Task, taskInput);
+    async create(taskInput: TaskInput, loggedUser: User) {
+        const { name, state, alertAt, eventDate, from, to} = taskInput;
 
-        const user = this.em.getReference(User, loggedUser.id);
-        task.owner = user;
+        const task = this.repo.createTask({
+            name,
+            state, 
+            alertAt, 
+            eventDate: eventDate ? new Date(eventDate) : undefined, 
+            from, 
+            to,
+            owner: loggedUser
+        });
         
-        await this.em.persist(task).flush();
+        await this.repo.flush();
         
         return task;
     }
 
-    async update(taskInput: TaskInput, loggedUser: LoggedUser): Promise<Task> {
-        const task = await this.em.findOneOrFail(Task, { id: taskInput.id }, ['owner']);
-        
+    async update(taskInput: UpdateInput, loggedUser: User) {
+        const {id, name, state, alertAt, eventDate, from, to} = taskInput;
+        const task = await this.repo.findById(id, ['owner']);
+
         if(task.owner.id != loggedUser.id && loggedUser.role != 'admin'){
-            throw new UnauthorizedException('Unauthorized');
+            throw new UnauthorizedException('Unauthorized.');
         }
 
-        TaskServiceImpl.updateFields(taskInput, task);
+        task.name = name;
+        task.state = state; 
+        task.alertAt = alertAt ? new Date(alertAt) : undefined,
+        task.eventDate = eventDate ? new Date(eventDate) : undefined;
+        task.from = from; 
+        task.to = to;
 
-        await this.em.flush();
+        await this.repo.flush();
+
         return task;
     }
 
-    async delete(id: number, loggedUser: LoggedUser): Promise<boolean> {
-        const task = await this.em.findOneOrFail(Task, { id }, ['owner']);
+    async delete(id: number, loggedUser: User): Promise<boolean> {
+        const task = await this.repo.findById(id, ['owner']);
         
         if(task.owner.id != loggedUser.id && loggedUser.role != 'admin'){
-            throw new UnauthorizedException('Unauthorized');
+            throw new UnauthorizedException('Unauthorized.');
         }
         
-        await this.em.remove(task);
+        await this.repo.delete(task);
         
         return true;
-    }
-
-    static updateFields(taskInput: TaskInput, task : {[key: string]:any}){
-        Object.entries(taskInput).forEach(([key, value]) => {
-            if(typeof value !== 'undefined'){
-                task[key] = value;
-            }
-        });
     }
 }
