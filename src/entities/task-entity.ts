@@ -1,11 +1,11 @@
 import { Entity, PrimaryKey, Property, ManyToOne, DateType, TimeType } from '@mikro-orm/core';
-import User  from './user';
+import User  from './user-entity';
 import { ObjectType, Field, Int } from 'type-graphql';
 import TaskRepositoryImpl from '../repositories/task-repository-impl';
 
 @ObjectType()
 @Entity({ customRepository: () => TaskRepositoryImpl })
-export class Task {
+export default class Task {
     @Field(() => Int)
     @PrimaryKey()
     id!: number;

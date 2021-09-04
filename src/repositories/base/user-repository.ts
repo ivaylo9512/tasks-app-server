@@ -1,4 +1,4 @@
-import User from "../../entities/user";
+import User from "../../entities/user-entity";
 import { EntityData } from "@mikro-orm/core";
 import { EntityRepository } from "@mikro-orm/mysql";
 

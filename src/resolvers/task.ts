@@ -1,6 +1,6 @@
 import { Resolver, Query, Ctx, Arg, Mutation, Int } from 'type-graphql';
 import { ApolloContext } from '../types';
-import { Task } from '../entities/task';
+import Task from '../entities/task-entity';
 import TaskInput from './types/task-input';
 import UpdateInput from './types/update-input';
 

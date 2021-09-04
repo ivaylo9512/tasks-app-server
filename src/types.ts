@@ -1,7 +1,7 @@
 import {Request, Response} from 'express'
 import TaskService from "./service/task-service-impl";
 import UserService from "./service/base/user-service";
-import UserEntity from './entities/user';
+import UserEntity from './entities/user-entity';
 
 export type ApolloContext = {
     userService: UserService;

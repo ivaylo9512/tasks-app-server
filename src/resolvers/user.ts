@@ -1,6 +1,6 @@
 import { Resolver, Query, Arg, Ctx, Mutation, Int } from "type-graphql";
 import { ApolloContext } from "../types";
-import User from "../entities/user";
+import User from "../entities/user-entity";
 import UserInput from "./types/user-input";
 
 @Resolver()

@@ -1,5 +1,5 @@
 import UserService from './base/user-service';
-import User from '../entities/user';
+import User from '../entities/user-entity';
 import UnauthorizedException from '../exceptions/unauthorized'
 import { JwtUser } from '../types';
 import UserInput from '../resolvers/types/user-input';

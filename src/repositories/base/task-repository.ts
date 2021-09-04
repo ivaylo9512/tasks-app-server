@@ -1,5 +1,5 @@
 import { EntityData } from "@mikro-orm/core";
-import { Task } from "../../entities/task";
+import Task from "../../entities/task-entity";
 import { EntityRepository } from "@mikro-orm/mysql";
 
 export default interface TaskRepository extends EntityRepository<Task>{

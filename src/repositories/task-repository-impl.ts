@@ -1,7 +1,7 @@
 import { EntityRepository } from "@mikro-orm/mysql";
 import { EntityData } from "@mikro-orm/core";
 import TaskRepository from "./base/task-repository";
-import { Task } from "../entities/task";
+import Task from "../entities/task-entity";
 
 export default class TaskRepositoryImpl extends EntityRepository<Task> implements TaskRepository{
     findById(id: number, selections?: string[]){

@@ -1,5 +1,5 @@
 import { Entity, PrimaryKey, OneToMany, Collection, Property } from "@mikro-orm/core";
-import { Task } from "./task";
+import Task from "./task-entity";
 import { ObjectType, Field, Int } from "type-graphql";
 import UserRepositoryImpl from "../repositories/user-repository-impl";
 

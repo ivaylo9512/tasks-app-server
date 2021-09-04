@@ -14,8 +14,8 @@ import TaskService from './service/task-service-impl';
 import UserService from './service/user-service-impl';
 import { DateTypeScalar } from './scalars/date-time';
 import multer from 'multer';
-import { Task } from './entities/task';
-import User from './entities/user';
+import Task from './entities/task-entity';
+import User from './entities/user-entity';
 import { applyMiddleware } from 'graphql-middleware';
 import authMiddleware from './resolvers/middlewares/auth';
 

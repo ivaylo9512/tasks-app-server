@@ -1,8 +1,8 @@
 import 'reflect-metadata';
-import { Task } from './entities/task';
+import Task from './entities/task-entity';
 import { MikroORM, ReflectMetadataProvider, Dictionary, IPrimaryKey } from '@mikro-orm/core'
 import path from 'path';
-import User from './entities/user';
+import User from './entities/user-entity';
 import EntitiyNotFoundException from './exceptions/enitity-not-found';
 import { NODE_ENV } from './app';
 
@@ -18,6 +18,8 @@ export default {
     metadataProvider: ReflectMetadataProvider,
     user: 'postgres',
     password: '1234',
+    host: '192.168.0.105',
+    port: 5432,
     debug: NODE_ENV !== 'production',
     type: 'postgresql'
 } as Parameters<typeof MikroORM.init>[0];

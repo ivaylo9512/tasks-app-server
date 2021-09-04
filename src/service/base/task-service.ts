@@ -1,6 +1,6 @@
 import TaskInput from '../../resolvers/types/task-input';
-import { Task } from '../../entities/task';
-import User from '../../entities/user';
+import Task from '../../entities/task-entity';
+import User from '../../entities/user-entity';
 import UpdateInput from '../../resolvers/types/update-input';
 
 export default interface TaskService {
